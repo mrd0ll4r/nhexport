@@ -3,102 +3,103 @@ package nhexport
 // An Algorithm is one algorithm.
 type Algorithm int
 
-// Algorithm constants
+// Algorithm constants.
+// Taken from github.com/bitbandi/go-nicehash-api.
 const (
-	AlgoTypeScrypt Algorithm = iota
-	AlgoTypeSHA256
-	AlgoTypeScryptNf
-	AlgoTypeX11
-	AlgoTypeX13
-	AlgoTypeKeccak
-	AlgoTypeX15
-	AlgoTypeNist5
-	AlgoTypeNeoScrypt
-	AlgoTypeLyra2RE
-	AlgoTypeWhirlpoolX
-	AlgoTypeQubit
-	AlgoTypeQuark
-	AlgoTypeAxiom
-	AlgoTypeLyra2REv2
-	AlgoTypeScryptJaneNf16
-	AlgoTypeBlake256r8
-	AlgoTypeBlake256r14
-	AlgoTypeBlake256r8vnl
-	AlgoTypeHodl
-	AlgoTypeDaggerHashimoto
-	AlgoTypeDecred
-	AlgoTypeCryptoNight
-	AlgoTypeLbry
-	AlgoTypeEquihash
-	AlgoTypePascal
-	AlgoTypeX11Gost
-	AlgoTypeSia
-	AlgoTypeBlake2s
-	AlgoTypeSkunk
+	AlgorithmScrypt Algorithm = iota
+	AlgorithmSHA256
+	AlgorithmScryptNf
+	AlgorithmX11
+	AlgorithmX13
+	AlgorithmKeccak
+	AlgorithmX15
+	AlgorithmNist5
+	AlgorithmNeoScrypt
+	AlgorithmLyra2RE
+	AlgorithmWhirlpoolX
+	AlgorithmQubit
+	AlgorithmQuark
+	AlgorithmAxiom
+	AlgorithmLyra2REv2
+	AlgorithmScryptJaneNf16
+	AlgorithmBlake256r8
+	AlgorithmBlake256r14
+	AlgorithmBlake256r8vnl
+	AlgorithmHodl
+	AlgorithmDaggerHashimoto
+	AlgorithmDecred
+	AlgorithmCryptoNight
+	AlgorithmLbry
+	AlgorithmEquihash
+	AlgorithmPascal
+	AlgorithmX11Gost
+	AlgorithmSia
+	AlgorithmBlake2s
+	AlgorithmSkunk
 )
 
 // ToString implements fmt.Stringer for an Algorithm.
 func (t Algorithm) ToString() string {
 	switch t {
-	case AlgoTypeScrypt:
+	case AlgorithmScrypt:
 		return "Scrypt"
-	case AlgoTypeSHA256:
+	case AlgorithmSHA256:
 		return "SHA256"
-	case AlgoTypeScryptNf:
+	case AlgorithmScryptNf:
 		return "ScryptNf"
-	case AlgoTypeX11:
+	case AlgorithmX11:
 		return "X11"
-	case AlgoTypeX13:
+	case AlgorithmX13:
 		return "X13"
-	case AlgoTypeKeccak:
+	case AlgorithmKeccak:
 		return "Keccak"
-	case AlgoTypeX15:
+	case AlgorithmX15:
 		return "X15"
-	case AlgoTypeNist5:
+	case AlgorithmNist5:
 		return "Nist5"
-	case AlgoTypeNeoScrypt:
+	case AlgorithmNeoScrypt:
 		return "NeoScrypt"
-	case AlgoTypeLyra2RE:
+	case AlgorithmLyra2RE:
 		return "Lyra2RE"
-	case AlgoTypeWhirlpoolX:
+	case AlgorithmWhirlpoolX:
 		return "WhirlpoolX"
-	case AlgoTypeQubit:
+	case AlgorithmQubit:
 		return "Qubit"
-	case AlgoTypeQuark:
+	case AlgorithmQuark:
 		return "Quark"
-	case AlgoTypeAxiom:
+	case AlgorithmAxiom:
 		return "Axiom"
-	case AlgoTypeLyra2REv2:
+	case AlgorithmLyra2REv2:
 		return "Lyra2REv2"
-	case AlgoTypeScryptJaneNf16:
+	case AlgorithmScryptJaneNf16:
 		return "ScryptJaneNf16"
-	case AlgoTypeBlake256r8:
+	case AlgorithmBlake256r8:
 		return "Blake256r8"
-	case AlgoTypeBlake256r14:
+	case AlgorithmBlake256r14:
 		return "Blake256r14"
-	case AlgoTypeBlake256r8vnl:
+	case AlgorithmBlake256r8vnl:
 		return "Blake256r8vnl"
-	case AlgoTypeHodl:
+	case AlgorithmHodl:
 		return "Hodl"
-	case AlgoTypeDaggerHashimoto:
+	case AlgorithmDaggerHashimoto:
 		return "DaggerHashimoto"
-	case AlgoTypeDecred:
+	case AlgorithmDecred:
 		return "Decred"
-	case AlgoTypeCryptoNight:
+	case AlgorithmCryptoNight:
 		return "CryptoNight"
-	case AlgoTypeLbry:
+	case AlgorithmLbry:
 		return "Lbry"
-	case AlgoTypeEquihash:
+	case AlgorithmEquihash:
 		return "Equihash"
-	case AlgoTypePascal:
+	case AlgorithmPascal:
 		return "Pascal"
-	case AlgoTypeX11Gost:
+	case AlgorithmX11Gost:
 		return "X11Gost"
-	case AlgoTypeSia:
+	case AlgorithmSia:
 		return "Sia"
-	case AlgoTypeBlake2s:
+	case AlgorithmBlake2s:
 		return "Blake2s"
-	case AlgoTypeSkunk:
+	case AlgorithmSkunk:
 		return "Skunk"
 	default:
 		return "Unknown"
