@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"time"
 
@@ -28,44 +29,66 @@ func init() {
 	flag.BoolVar(&payments, "payments", false, "whether to export hashrates+history (default) or payments")
 }
 
-func printErr(a ...interface{}) {
-	fmt.Fprintln(os.Stderr, a...)
-}
-
 func main() {
 	flag.Parse()
+
 	if len(addr) == 0 {
 		flag.Usage()
-		printErr("Need address.")
+		fmt.Println("Need address.")
 		os.Exit(2)
 	}
 
+	os.Exit(doStuff())
+}
+
+func doStuff() int {
 	since, err := time.Parse("2006-01-02", from)
 	if err != nil {
-		printErr(err)
-		os.Exit(2)
+		fmt.Println(err)
+		return 2
 	}
 
 	until, err := time.Parse("2006-01-02", to)
 	if err != nil {
-		printErr(err)
-		os.Exit(2)
+		fmt.Println(err)
+		return 2
 	}
 
+	mode := "hashrate"
 	if payments {
-		err = getPayments(since, until)
+		mode = "payments"
+	}
+
+	fName := fmt.Sprintf("%s-%s-%s-%s.csv", from, to, addr, mode)
+	f, err := os.Create(fName)
+	if err != nil {
+		fmt.Println(err)
+		return 1
+	}
+	defer func() {
+		f.Close()
+		if err != nil {
+			os.Remove(fName)
+		}
+	}()
+
+	if payments {
+		err = getPayments(f, since, until)
 	} else {
-		err = getHistory(since, until)
+		err = getHistory(f, since, until)
 	}
 
 	if err != nil {
-		printErr(err)
-		os.Exit(1)
+		fmt.Println(err)
+		return 1
 	}
+
+	fmt.Printf("Wrote to %s\n", fName)
+	return 0
 }
 
-func getPayments(since, until time.Time) error {
-	printErr("getting $$$payments$$$ ...")
+func getPayments(f io.Writer, since, until time.Time) error {
+	fmt.Println("getting $$$payments$$$ ...")
 	payments, err := nhexport.GetPayoutsSince(addr, since)
 	if err != nil {
 		return err
@@ -73,7 +96,7 @@ func getPayments(since, until time.Time) error {
 
 	untilTs := until.Unix()
 
-	w := csv.NewWriter(os.Stdout)
+	w := csv.NewWriter(f)
 	defer w.Flush()
 	err = w.Write(nhexport.PaymentsCSVHeader())
 	if err != nil {
@@ -94,8 +117,8 @@ func getPayments(since, until time.Time) error {
 	return nil
 }
 
-func getHistory(since, until time.Time) error {
-	printErr("getting ~~hashrate + history~~ ...")
+func getHistory(f io.Writer, since, until time.Time) error {
+	fmt.Println("getting ~~hashrate + history~~ ...")
 	history, err := nhexport.GetAlgorithmHistoriesSince(addr, since)
 	if err != nil {
 		return err
@@ -103,7 +126,7 @@ func getHistory(since, until time.Time) error {
 
 	untilTs := until.Unix()
 
-	w := csv.NewWriter(os.Stdout)
+	w := csv.NewWriter(f)
 	defer w.Flush()
 	err = w.Write(nhexport.HistoryCSVHeader())
 	if err != nil {

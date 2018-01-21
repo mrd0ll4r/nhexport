@@ -9,8 +9,7 @@ A quick-and-dirty nicehash-to-CSV exporter.
 
 It exports either the payment history (set `-payment`), or the history of hashrates and unpaid balances per algorithm (default).
 
-This will print out CSV (including headers) to Stdout, so you can redirect it easily.
-All errors are printed to Stderr.
+This will print out CSV (including headers) to a file named `FROM-TO-ADDR-MODE.csv`.
 
 ## Installation
 
