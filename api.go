@@ -158,19 +158,154 @@ type AlgorithmHistory struct {
 	Data      []HistoryEntry
 }
 
-type apiResponse struct {
-	Method string                `json:"method"`
-	Result providerStatsResponse `json:"result"`
+type providerStatsResponse struct {
+	Method string            `json:"method"`
+	Result providerStatsData `json:"result"`
 }
 
-type providerStatsResponse struct {
+type providerStatsData struct {
+	Payments []ProviderStatsPayment `json:"payments"`
+	Address  string                 `json:"addr"`
+	Error    string                 `json:"error"`
+}
+
+type ProviderStatsPayment struct {
+	Amount decimal.Decimal `json:"amount"`
+	Fee    decimal.Decimal `json:"fee"`
+	TXID   string          `json:"TXID"`
+	Time   string          `json:"time"`
+}
+
+func providerStats(addr string) (*providerStatsData, error) {
+	params := url.Values{}
+	params.Set("method", "stats.provider")
+	params.Set("addr", addr)
+	p := params.Encode()
+
+	resp, err := http.Get("https://api.nicehash.com/api?" + p)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to perform request")
+	}
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to read response body")
+	}
+
+	fmt.Println(string(b))
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("server returned status %d: %s, body %s", resp.StatusCode, resp.Status, string(b))
+	}
+
+	r := providerStatsResponse{}
+	err = json.Unmarshal(b, &r)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to decode response (raw: %s)", string(b))
+	}
+
+	if len(r.Result.Error) != 0 {
+		return nil, fmt.Errorf("API returned error: %q", r.Result.Error)
+	}
+
+	if r.Method != "stats.provider" {
+		return nil, fmt.Errorf("got result for wrong method? Expected %q, got %q, body %s", "stats.provider.ex", r.Method, string(b))
+	}
+
+	if r.Result.Address != addr {
+		return nil, fmt.Errorf("got result for wrong address? Expected %q, got %q, body %s", addr, r.Result.Address, string(b))
+	}
+
+	return &r.Result, nil
+}
+
+func GetPayments2(addr string) ([]ProviderStatsPayment, error) {
+	stats, err := providerStats(addr)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to get payments")
+	}
+
+	return stats.Payments, nil
+}
+
+type providerStatsPaymentsResponse struct {
+	Method string                    `json:"method"`
+	Result providerStatsPaymentsData `json:"result"`
+}
+
+type providerStatsPaymentsData struct {
+	NicehashWallet bool      `json:"nh_wallet"`
+	Error          string    `json:"error"`
+	Address        string    `json:"addr"`
+	Payments       []Payment `json:"payments"`
+}
+
+type providerStatsExResponse struct {
+	Method string              `json:"method"`
+	Result providerStatsExData `json:"result"`
+}
+
+type providerStatsExData struct {
 	Error    string                `json:"error"`
 	Address  string                `json:"addr"`
 	Payments []Payment             `json:"payments"`
 	Past     []rawAlgorithmHistory `json:"past"`
 }
 
-func providerStatsEx(addr string, from time.Time) (*providerStatsResponse, error) {
+/*{"result":{"nh_wallet":true,"payments":[{"amount":"0.00184355","fee":"0.00003762","TXID":"","time":1517745322,"type":1},{"amount":"0.0023911","fee":"0.0000488","TXID":"","time":1517659457,"type":1},{"amount":"0.00164461","fee":"0.00003356","TXID":"","time":1517393816,"type":1},{"amount":"0.0014891","fee":"0.00003039","TXID":"","time":1517308504,"type":1},{"amount":"0.00112895","fee":"0.00002304","TXID":"","time":1517219972,"type":1}],"addr":"3BqXFXqDJMAraFewFuFmDrnQbR65uK82og"},"method":"stats.provider.payments"}*/
+
+func providerStatsPayments(addr string, from time.Time) (*providerStatsPaymentsData, error) {
+	fromUnix := from.Unix()
+	params := url.Values{}
+	params.Set("method", "stats.provider.payments")
+	params.Set("addr", addr)
+	p := params.Encode()
+
+	resp, err := http.Get("https://api.nicehash.com/api?" + p)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to perform request")
+	}
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to read response body")
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("server returned status %d: %s, body %s", resp.StatusCode, resp.Status, string(b))
+	}
+
+	r := providerStatsPaymentsResponse{}
+	err = json.Unmarshal(b, &r)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to decode response (raw: %s)", string(b))
+	}
+
+	if len(r.Result.Error) != 0 {
+		return nil, fmt.Errorf("API returned error: %q", r.Result.Error)
+	}
+
+	if r.Method != "stats.provider.payments" {
+		return nil, fmt.Errorf("got result for wrong method? Expected %q, got %q, body %s", "stats.provider.ex", r.Method, string(b))
+	}
+
+	if r.Result.Address != addr {
+		return nil, fmt.Errorf("got result for wrong address? Expected %q, got %q, body %s", addr, r.Result.Address, string(b))
+	}
+
+	var payments []Payment
+	for _, p := range r.Result.Payments {
+		if p.Timestamp >= fromUnix {
+			payments = append(payments, p)
+		}
+	}
+
+	r.Result.Payments = payments
+
+	return &r.Result, nil
+}
+
+func providerStatsEx(addr string, from time.Time) (*providerStatsExData, error) {
 	fromUnix := from.Unix()
 	params := url.Values{}
 	params.Set("method", "stats.provider.ex")
@@ -192,7 +327,7 @@ func providerStatsEx(addr string, from time.Time) (*providerStatsResponse, error
 		return nil, fmt.Errorf("server returned status %d: %s, body %s", resp.StatusCode, resp.Status, string(b))
 	}
 
-	r := apiResponse{}
+	r := providerStatsExResponse{}
 	err = json.Unmarshal(b, &r)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to decode response (raw: %s)", string(b))
@@ -215,7 +350,7 @@ func providerStatsEx(addr string, from time.Time) (*providerStatsResponse, error
 
 // GetPayoutsSince returns payouts since the given date.
 func GetPayoutsSince(addr string, from time.Time) ([]Payment, error) {
-	resp, err := providerStatsEx(addr, from)
+	resp, err := providerStatsPayments(addr, from)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to query API")
 	}
