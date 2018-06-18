@@ -139,7 +139,7 @@ func getHistory(f io.Writer, since, until time.Time) error {
 				continue
 			}
 
-			data := []string{algo.Algorithm.ToString()}
+			data := []string{algo.Algorithm.String()}
 			data = append(data, entry.CSV()...)
 
 			err = w.Write(data)

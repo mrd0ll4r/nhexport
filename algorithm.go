@@ -36,10 +36,13 @@ const (
 	AlgorithmSia
 	AlgorithmBlake2s
 	AlgorithmSkunk
+	AlgorithmCryptoNightV7
+	AlgorithmCryptoNightHeavy
+	AlgorithmLyra2Z
 )
 
-// ToString implements fmt.Stringer for an Algorithm.
-func (t Algorithm) ToString() string {
+// String implements fmt.Stringer for an Algorithm.
+func (t Algorithm) String() string {
 	switch t {
 	case AlgorithmScrypt:
 		return "Scrypt"
@@ -101,6 +104,12 @@ func (t Algorithm) ToString() string {
 		return "Blake2s"
 	case AlgorithmSkunk:
 		return "Skunk"
+	case AlgorithmCryptoNightV7:
+		return "CryptoNightV7"
+	case AlgorithmCryptoNightHeavy:
+		return "CryptoNightHeavy"
+	case AlgorithmLyra2Z:
+		return "Lyra2Z"
 	default:
 		return "Unknown"
 	}
