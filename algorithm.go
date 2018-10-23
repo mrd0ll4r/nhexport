@@ -39,6 +39,8 @@ const (
 	AlgorithmCryptoNightV7
 	AlgorithmCryptoNightHeavy
 	AlgorithmLyra2Z
+	AlgorithmX16R
+	AlgorithmCryptoNightV8
 )
 
 // String implements fmt.Stringer for an Algorithm.
@@ -110,6 +112,10 @@ func (t Algorithm) String() string {
 		return "CryptoNightHeavy"
 	case AlgorithmLyra2Z:
 		return "Lyra2Z"
+	case AlgorithmX16R:
+		return "X16R"
+	case AlgorithmCryptoNightV8:
+		return "CryptoNightV8"
 	default:
 		return "Unknown"
 	}
